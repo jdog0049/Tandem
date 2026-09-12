@@ -14,7 +14,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npm run typecheck
       - run: npx wrangler d1 migrations apply tandem-db --remote
         env:
