@@ -51,9 +51,6 @@ async function activateIfReady(cycleId:string,env:Env){
   const challengeStatements=challengeRows(cycleId,topics).map(c=>env.DB.prepare("INSERT INTO challenges(id,cycle_id,day_number,type,title,prompt,detail) VALUES(?,?,?,?,?,?,?)").bind(c.id,c.cycleId,c.day,c.type,c.title,c.prompt,c.detail));
   await env.DB.batch([env.DB.prepare("UPDATE cycles SET status='active',start_date=?,end_date=? WHERE id=?").bind(start,end,cycleId),...lessonStatements,...challengeStatements]);
 }
-async function wikiFact(topic:string,day:number){
-  try{const r=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic.replace(/ /g,"_"))}`,{headers:{"User-Agent":"TandemLearning/1.0"}});if(!r.ok)return null;const d=await r.json() as {extract?:string};const sentences=(d.extract||"").match(/[^.!?]+[.!?]+/g)||[];if(!sentences.length)return d.extract||null;const at=(day-1)%sentences.length;return [sentences[at],sentences[(at+1)%sentences.length]].join(" ").trim()}catch{return null}
-}
 async function getState(request:Request,env:Env){
   const user=await currentUser(request,env);if(!user)return json({authenticated:false});
   const members=(await env.DB.prepare("SELECT id,name,color FROM users WHERE pair_id=? ORDER BY created_at").bind(user.pair_id).all<{id:string;name:string;color:string}>()).results;
@@ -65,8 +62,6 @@ async function getState(request:Request,env:Env){
   if(cycle.status==="draft")return json({authenticated:true,user:{id:user.id,name:user.name,color:user.color},partner,inviteCode:pair?.invite_code,cycle:{...cycle,dayNumber:1,startDate:null},topics});
   const day=dayNumber(cycle.start_date);
   const lessons=(await env.DB.prepare(`SELECT l.id,l.topic_id as topicId,t.name as topicName,l.day_number as dayNumber,l.activity_type as activityType,l.title,l.content,l.prompt,CASE WHEN p.user_id IS NULL THEN 0 ELSE 1 END as completed FROM lessons l JOIN topics t ON t.id=l.topic_id LEFT JOIN progress p ON p.lesson_id=l.id AND p.user_id=? WHERE l.cycle_id=? AND l.day_number=? ORDER BY t.rowid`).bind(user.id,cycle.id,day).all<any>()).results.map(x=>({...x,completed:Boolean(x.completed)}));
-  const facts=await Promise.all(lessons.map(l=>wikiFact(l.topicName,day)));
-  lessons.forEach((l,i)=>l.fact=facts[i]||l.content);
   const counts=(await env.DB.prepare(`SELECT p.user_id as userId,COUNT(*) as count FROM progress p JOIN lessons l ON l.id=p.lesson_id WHERE l.cycle_id=? AND l.day_number=? GROUP BY p.user_id`).bind(cycle.id,day).all<{userId:string;count:number}>()).results;
   const progress=Object.fromEntries(members.map(m=>[m.id,Number(counts.find(c=>c.userId===m.id)?.count||0)]));
   const ch=await env.DB.prepare("SELECT id,type,title,prompt,detail FROM challenges WHERE cycle_id=? AND day_number=?").bind(cycle.id,day).first<any>();
