@@ -11,7 +11,7 @@
     {
       "binding": "DB",
       "database_name": "tandem-db",
-      "database_id": "PASTE_YOUR_D1_DATABASE_ID_HERE",
+      "database_id": "7333f9c9-8378-4bb7-9cba-b17fcb803ee6",
       "migrations_dir": "migrations"
     }
   ],
