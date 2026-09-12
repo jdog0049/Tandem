@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run typecheck && vite build",
     "preview": "vite preview",
     "deploy": "npm run build && wrangler deploy",
     "db:local": "wrangler d1 migrations apply tandem-db --local",
     "db:remote": "wrangler d1 migrations apply tandem-db --remote",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.worker.json"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.13.0",
