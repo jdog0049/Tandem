@@ -14,7 +14,6 @@ A two-person daily learning app. You each choose a topic, choose a third togethe
 - Secret answers that reveal only after both people submit
 - D1 persistence and secure HttpOnly device sessions
 - Mobile-first responsive design
-- Optional Wikipedia summary enrichment for daily facts
 - GitHub Actions deployment workflow
 
 ## Before you begin
@@ -98,7 +97,7 @@ For stronger protection, put the deployed Worker behind [Cloudflare Access](http
 
 ## Content notes
 
-Version 1 retrieves short background excerpts from Wikipedia when possible and rotates activity lenses across each 14-day cycle. The full lesson and challenge schedule is stored in D1 when a cycle begins. This avoids needing a paid AI API.
+Version 1 rotates guided activity lenses across each 14-day cycle, and stores the full lesson and challenge schedule in D1 when a cycle begins. It does not send your topic choices to outside services or require a paid AI API.
 
 A future version can add AI-generated custom curricula, spaced-repetition review, reactions, achievements, and completed-cycle archives without changing the core database structure.
 
